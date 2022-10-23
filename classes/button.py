@@ -67,4 +67,3 @@ class Button(Entity):
     def unhide(self):
         self.hidden = False
         self.update_image()
-

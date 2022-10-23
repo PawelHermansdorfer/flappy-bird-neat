@@ -1,5 +1,6 @@
 import pygame
 import time
+import random
 from classes.entity import Entity
 import src.constants as const
 from src.colors import TRANSPARENT
@@ -15,7 +16,9 @@ class Bird(Entity):
     max_speed = 15
     jump_force = 15
 
-    def __init__(self):
+    spawn_offset_from_center = const.HEIGHT // 2
+
+    def __init__(self, genome ,network):
         self.bird_imgs = [pygame.transform.scale(img,
                                                  (self.width, self.height))
                           for img in self.bird_imgs]
@@ -23,7 +26,9 @@ class Bird(Entity):
         self.start_time = time.time()
         self.animation_speed = 2
         super().__init__(
-            pos=(const.WIDTH // 2 - self.width, const.HEIGHT_CENTER),
+            pos=(const.WIDTH // 2 - self.width,
+                 random.randint(const.HEIGHT_CENTER-self.spawn_offset_from_center,
+                                const.HEIGHT+self.spawn_offset_from_center)),
             image=pygame.Surface(self.img_size),
         )
         self.vel_y = 0
@@ -31,12 +36,21 @@ class Bird(Entity):
         self.dead = False
         self.angle = 0
 
-    def pipe_colide(self, pipe):
+        # Brain
+        self.genome = genome
+        self.genome.fitness = 0
+        self.network = network
+
+    def pipe_collide(self, pipe):
         bird_mask = pygame.mask.from_surface(self.image)
         pipe_mask = pygame.mask.from_surface(pipe.image)
         offset = (pipe.pos_x - self.pos_x, pipe.pos_y - self.pos_y)
 
-        if bird_mask.overlap(pipe_mask, offset):
+        if (bird_mask.overlap(pipe_mask, offset)
+            or (self.pos_x in range(int(pipe.pos_x), int(pipe.pos_x + pipe.width))
+                and self.pos_y < 0)):
+            # Decrease fitness
+            self.genome.fitness -= 2
             self.die()
 
     def update(self):
@@ -60,10 +74,12 @@ class Bird(Entity):
         # Set acceleration to 0
         self.acc_y = 0
 
-        # Collide bootom of window
+        # Collide bottom of window
         ground_pos = const.HEIGHT - const.GROUND_HEIGHT
         if self.pos_y + (self.rect.height//2) > ground_pos:
             self.pos_y = ground_pos - (self.rect.height // 2)
+            # Decrease fitness
+            self.genome.fitness -= 2
             self.die()
 
         if self.vel_y < 0:
@@ -80,10 +96,10 @@ class Bird(Entity):
 
         super().update()
 
-    # Animate bird by using keyframs from list
+    # Animate bird by using keyframes from list
     def animate(self):
         self.current_bird_img = self.bird_imgs[
-            round(abs(((self.start_time - time.time())
+            round(abs(((time.time() - self.start_time)
                        * self.animation_speed
                        % 4)
                       - 2))
@@ -102,5 +118,7 @@ class Bird(Entity):
             self.vel_y = -self.jump_force
 
     def die(self):
+        # Add survived time to fitness
+        self.genome.fitness += time.time() - self.start_time
         self.jump()
         self.dead = True
