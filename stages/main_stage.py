@@ -10,6 +10,7 @@ from classes.pipe import Pipe
 import src.constants as const
 
 import neat
+from neat.six_util import iteritems, itervalues
 
 
 class GameStage(Stage):
@@ -35,9 +36,10 @@ class GameStage(Stage):
         population_stats = neat.StatisticsReporter()
         self.population.add_reporter(population_stats)
 
-        self.population.run(self.new_gen_thread.start, 1)
+        # self.population.run(self.new_gen_thread.start, 1)
+        self.start_new_generation()
 
-    def new_generation(self, genomes, config):
+    def start_new_generation(self):
         self.pipes.clear()
         self.birds.clear()
         for layer in const.LAYERS:
@@ -49,20 +51,80 @@ class GameStage(Stage):
         self.pipes.append(Pipe())
         self.layers['GROUND'].add(pipe for pipe in self.pipes)
 
-        for _, genome in genomes:
+        for _, genome in list(iteritems(self.population.population)):
             bird = Bird(genome=genome,
-                        network=neat.nn.FeedForwardNetwork.create(genome, config))
+                        network=neat.nn.FeedForwardNetwork.create(genome,
+                                                                  self.neat_config))
             self.birds.append(bird)
             self.layers['PLAYER'].add(bird)
 
         self.create_buttons()
-        while True:
-            print(1)
+
+        self.population.reporters.start_generation(self.population.generation)
+
+    def end_current_generation(self):
+        # Gather and report statistics.
+        best = None
+        for g in itervalues(self.population.population):
+            if best is None or g.fitness > best.fitness:
+                best = g
+        self.population.reporters.post_evaluate(self.neat_config,
+                                                self.population.population,
+                                                self.population.species,
+                                                best)
+
+        # Track the best genome ever seen.
+        if self.population.best_genome is None or best.fitness > self.population.best_genome.fitness:
+            self.population.best_genome = best
+
+        if not self.neat_config.no_fitness_termination:
+            # End if the fitness threshold is reached.
+            fv = self.population.fitness_criterion(g.fitness for g in itervalues(self.population.population))
+            if fv >= self.neat_config.fitness_threshold:
+                self.population.reporters.found_solution(self.config, self.generation, best)
+                # TODO(Aa_Pawelek): MAKE END WHEN FITNESS CAP IS REACHED
+                print('Fitness cap')
+
+
+        # Create the next generation from the current generation.
+        self.population.population = self.population.reproduction.reproduce(
+            self.neat_config, self.population.species,
+            self.neat_config.pop_size, self.population.generation)
+
+        # Check for complete extinction.
+        if not self.population.species.species:
+            self.population.reporters.complete_extinction()
+
+            # If requested by the user, create a completely new population,
+            # otherwise raise an exception.
+            if self.neat_config.reset_on_extinction:
+                self.population.population = self.population.reproduction.create_new(self.neat_config.genome_type,
+                                                                self.neat_config.genome_config,
+                                                                self.neat_config.pop_size)
+            else:
+                raise neat.CompleteExtinctionException()
+
+        # Divide the new population into species.
+        self.population.species.speciate(self.neat_config, self.population.population, self.population.generation)
+
+        self.population.reporters.end_generation(self.neat_config, self.population.population, self.population.species)
+
+        self.population.generation += 1
+
+        if self.neat_config.no_fitness_termination:
+            self.population.reporters.found_solution(self.neat_config, self.population.generation, self.population.best_genome)
+
+        return self.population.best_genome
+
+
+
+
 
     def update(self):
         super().update()
         if [bird.dead for bird in self.birds] == [True] * len(self.birds):
-            self.population.run(self.new_generation, 1)
+            self.end_current_generation()
+            self.start_new_generation()
             return
 
         # Spawning and removing pipes
