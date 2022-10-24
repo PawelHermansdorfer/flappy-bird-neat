@@ -18,7 +18,7 @@ class Bird(Entity):
 
     spawn_offset_from_center = const.HEIGHT // 2
 
-    def __init__(self, genome ,network):
+    def __init__(self, genome, network):
         self.bird_imgs = [pygame.transform.scale(img,
                                                  (self.width, self.height))
                           for img in self.bird_imgs]
@@ -108,11 +108,6 @@ class Bird(Entity):
                       - 2))
         ]
 
-    def keyboard_pressed(self, key):
-        super().keyboard_pressed(key)
-        if key == pygame.K_SPACE:
-            self.jump()
-
     def apply_gravity(self):
         self.acc_y += self.gravity_force
 
@@ -121,6 +116,5 @@ class Bird(Entity):
             self.vel_y = -self.jump_force
 
     def die(self):
-        # Add survived time to fitness
         self.jump()
         self.dead = True

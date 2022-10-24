@@ -7,7 +7,7 @@ GROUND_HEIGHT = 60
 FONT_SIZE = 18
 
 # BUTTON SETTINGS
-BUTTON_FONT = 'fonts/VictorMono-Regular.ttf'
+FONT_VICTOR_MONO = 'fonts/VictorMono-Regular.ttf'
 BUTTON_FRAME_WIDTH = 1.8
 
 # DISPLAY INFO

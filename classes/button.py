@@ -14,7 +14,7 @@ class Button(Entity):
         self.click_event = click_event
         self.hidden = False
 
-        self.font = pygame.font.Font(const.BUTTON_FONT, font_size)
+        self.font = pygame.font.Font(const.FONT_VICTOR_MONO, font_size)
         self.text = self.font.render(text, True, (0, 0, 0))
         self.text_rect = self.text.get_rect(center=(self.width // 2,
                                                     self.height // 2))

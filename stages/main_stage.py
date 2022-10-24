@@ -11,6 +11,7 @@ import src.constants as const
 
 import neat
 from neat.six_util import iteritems, itervalues
+import pygame
 
 
 class GameStage(Stage):
@@ -28,7 +29,7 @@ class GameStage(Stage):
         self.birds = []
         self.pipes = []
 
-        self.stats_display = Stats()
+        self.stats_display = Stats('Generation')
         self.layers['UI'].add(self.stats_display)
         self.layers['BACKGROUND'].add(Background())
 
@@ -85,7 +86,6 @@ class GameStage(Stage):
                 # TODO(Aa_Pawelek): MAKE END WHEN FITNESS CAP IS REACHED
                 print('Fitness cap')
 
-
         # Create the next generation from the current generation.
         self.population.population = self.population.reproduction.reproduce(
             self.neat_config, self.population.species,
@@ -115,10 +115,6 @@ class GameStage(Stage):
             self.population.reporters.found_solution(self.neat_config, self.population.generation, self.population.best_genome)
 
         return self.population.best_genome
-
-
-
-
 
     def update(self):
         super().update()
@@ -151,8 +147,6 @@ class GameStage(Stage):
                                             self.pipes[0].gap_start))
             if output[0] > 0.5:
                 bird.jump()
-
-
 
         # Spawning and removing ground tiles
         if self.ground_tiles[0].pos_x + self.ground_tiles[0].width <= 0:
@@ -187,3 +181,13 @@ class GameStage(Stage):
 
         for btn in buttons:
             self.layers['UI'].add(btn)
+
+    def keyboard_input(self, key):
+        super().keyboard_input(key)
+        # NOTE: DEBUG
+        if key == pygame.K_SPACE:
+            self.stats_display.toggle()
+        elif key == pygame.K_a:
+            self.stats_display.clear_text()
+        elif key == pygame.K_s:
+            self.stats_display.add_text('BUZZ')
