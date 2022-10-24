@@ -128,10 +128,13 @@ class GameStage(Stage):
             return
 
         # Spawning and removing pipes
-        # TODO(Aa_Pawelek): change self.birds[0] to something better
+        # TODO(Aa_Pawelek): change self.birds[0] to something better cuz first bird sometimes dies
         if self.pipes[-1].pos_x + self.pipes[-1].width < self.birds[0].pos_x:
             self.pipes.append(Pipe())
             self.layers['GROUND'].add(self.pipes[-1])
+            for bird in self.birds:
+                if not bird.dead:
+                    bird.genome.fitness += 5
 
         if self.pipes[0].rect.x + self.pipes[0].width < 0:
             self.layers['GROUND'].remove(self.pipes[0])

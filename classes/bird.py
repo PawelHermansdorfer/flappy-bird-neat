@@ -50,7 +50,7 @@ class Bird(Entity):
             or (self.pos_x in range(int(pipe.pos_x), int(pipe.pos_x + pipe.width))
                 and self.pos_y < 0)):
             # Decrease fitness
-            self.genome.fitness -= 2
+            self.genome.fitness -= 1
             self.die()
 
     def update(self):
@@ -79,7 +79,7 @@ class Bird(Entity):
         if self.pos_y + (self.rect.height//2) > ground_pos:
             self.pos_y = ground_pos - (self.rect.height // 2)
             # Decrease fitness
-            self.genome.fitness -= 2
+            self.genome.fitness -= 1
             self.die()
 
         if self.vel_y < 0:
@@ -94,6 +94,9 @@ class Bird(Entity):
         self.image.fill(TRANSPARENT)
         self.image.blit(rotated_img, new_rect)
 
+        # Add genome fitness for each frame alive
+        if not self.dead:
+            self.genome.fitness += 0.1
         super().update()
 
     # Animate bird by using keyframes from list
@@ -119,6 +122,5 @@ class Bird(Entity):
 
     def die(self):
         # Add survived time to fitness
-        self.genome.fitness += time.time() - self.start_time
         self.jump()
         self.dead = True
