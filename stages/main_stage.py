@@ -1,17 +1,16 @@
-from .stage import Stage
+from operator import ne
+import pygame
+import neat
+from neat.six_util import iteritems, itervalues
 
+from .stage import Stage
 from classes.button import Button
 from classes.stats import Stats
 from classes.background import Background
 from classes.ground import Ground
 from classes.bird import Bird
 from classes.pipe import Pipe
-
 import src.constants as const
-
-import neat
-from neat.six_util import iteritems, itervalues
-import pygame
 
 
 class GameStage(Stage):
@@ -28,16 +27,21 @@ class GameStage(Stage):
         self.next = 'Settings'
         self.birds = []
         self.pipes = []
+        self.PIPE_SPAWN_DELAY = 90
+        self.time_to_pipe = self.PIPE_SPAWN_DELAY
 
-        self.stats_display = Stats('Generation')
+        self.stats_display = Stats('Generation',
+                                   'Highest score',
+                                   'Highest fitness',
+                                   'Avg fitness')
         self.layers['UI'].add(self.stats_display)
         self.layers['BACKGROUND'].add(Background())
+        self.create_buttons()
 
         self.population.add_reporter(neat.StdOutReporter(True))
         population_stats = neat.StatisticsReporter()
         self.population.add_reporter(population_stats)
 
-        # self.population.run(self.new_gen_thread.start, 1)
         self.start_new_generation()
 
     def start_new_generation(self):
@@ -51,6 +55,7 @@ class GameStage(Stage):
         self.layers['UNITS'].add(tile for tile in self.ground_tiles)
         self.pipes.append(Pipe())
         self.layers['GROUND'].add(pipe for pipe in self.pipes)
+        self.time_to_pipe = self.PIPE_SPAWN_DELAY
 
         for _, genome in list(iteritems(self.population.population)):
             bird = Bird(genome=genome,
@@ -59,7 +64,6 @@ class GameStage(Stage):
             self.birds.append(bird)
             self.layers['PLAYER'].add(bird)
 
-        self.create_buttons()
 
         self.population.reporters.start_generation(self.population.generation)
 
@@ -82,7 +86,7 @@ class GameStage(Stage):
             # End if the fitness threshold is reached.
             fv = self.population.fitness_criterion(g.fitness for g in itervalues(self.population.population))
             if fv >= self.neat_config.fitness_threshold:
-                self.population.reporters.found_solution(self.config, self.generation, best)
+                self.population.reporters.found_solution(self.neat_config, self.population.generation, best)
                 # TODO(Aa_Pawelek): MAKE END WHEN FITNESS CAP IS REACHED
                 print('Fitness cap')
 
@@ -117,20 +121,16 @@ class GameStage(Stage):
         return self.population.best_genome
 
     def update(self):
-        super().update()
         if [bird.dead for bird in self.birds] == [True] * len(self.birds):
             self.end_current_generation()
             self.start_new_generation()
+            super().update()
             return
 
-        # Spawning and removing pipes
-        # TODO(Aa_Pawelek): change self.birds[0] to something better cuz first bird sometimes dies
-        if self.pipes[-1].pos_x + self.pipes[-1].width < self.birds[0].pos_x:
-            self.pipes.append(Pipe())
-            self.layers['GROUND'].add(self.pipes[-1])
-            for bird in self.birds:
-                if not bird.dead:
-                    bird.genome.fitness += 5
+        self.time_to_pipe -= 1
+        if self.time_to_pipe <= 0:
+            self.spawn_pipe()
+            self.time_to_pipe = self.PIPE_SPAWN_DELAY
 
         if self.pipes[0].rect.x + self.pipes[0].width < 0:
             self.layers['GROUND'].remove(self.pipes[0])
@@ -138,15 +138,19 @@ class GameStage(Stage):
 
         for bird in self.birds:
             # TODO(Aa_Pawelek): Collide pipe[0]
-            for pipe in self.pipes:
-                bird.pipe_collide(pipe)
+            next_pipe_index = 0
+            while self.pipes[next_pipe_index].pos_x + self.pipes[next_pipe_index].width < bird.pos_x:
+                next_pipe_index += 1
+            bird.pipe_collide(self.pipes[next_pipe_index])
 
-            output = bird.network.activate((bird.pos_y,
-                                            bird.vel_y,
-                                            self.pipes[0].pos_x,
-                                            self.pipes[0].gap_start))
-            if output[0] > 0.5:
-                bird.jump()
+            if not bird.dead:
+                output = bird.neural_network.activate((bird.pos_y,
+                                                       bird.vel_y,
+                                                       self.pipes[next_pipe_index].gap_start,
+                                                       self.pipes[next_pipe_index].gap_end
+                                                       ))
+                if output[0] > 0.5:
+                    bird.jump()
 
         # Spawning and removing ground tiles
         if self.ground_tiles[0].pos_x + self.ground_tiles[0].width <= 0:
@@ -161,6 +165,12 @@ class GameStage(Stage):
 
         for tile in self.ground_tiles:
             tile.pos_x -= const.GAME_SPEED
+
+        super().update()
+
+    def spawn_pipe(self):
+        self.pipes.append(Pipe())
+        self.layers['GROUND'].add(self.pipes[-1])
 
     def create_buttons(self):
         button_size = (200, 40)
@@ -187,7 +197,3 @@ class GameStage(Stage):
         # NOTE: DEBUG
         if key == pygame.K_SPACE:
             self.stats_display.toggle()
-        elif key == pygame.K_a:
-            self.stats_display.clear_text()
-        elif key == pygame.K_s:
-            self.stats_display.add_text('BUZZ')

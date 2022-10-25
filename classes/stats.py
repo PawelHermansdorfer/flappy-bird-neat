@@ -1,7 +1,8 @@
 import pygame
-from .entity import Entity
 import src.constants as const
 from src.colors import BLACK, TRANSPARENT, TRANSPARENT_GREY, WHITE_SMOKE
+
+from .entity import Entity
 
 
 class Stats(Entity):
@@ -19,18 +20,17 @@ class Stats(Entity):
             bg_color=TRANSPARENT
         )
         self.hidden = True
-        self.font_size = round((self.display_size[1] / len(args))
-                               - 10)
+        self.font_size = min(round(self.display_size[1] / len(args)),
+                            15)
         self.font_line_width = self.font_size
         self.font = pygame.font.Font(const.FONT_VICTOR_MONO, self.font_size)
 
-        self.text_lines = {key: 'NAN' for key in args}
+        self.text_lines = {key: self.font.render(key + ': NAN', True, WHITE_SMOKE) for key in args}
 
 
-    def add_text(self, text):
-        # TODO: dict 
-        text = self.font.render(text, True, WHITE_SMOKE)
-        self.text_lines.append(text)
+    def update_stats(self, key, text):
+        text = self.font.render(key + ': ' + text, True, WHITE_SMOKE)
+        self.text_lines[key] = text
         self.update_image()
 
     def clear_text(self):
@@ -50,8 +50,8 @@ class Stats(Entity):
                 self.image.get_rect(),
                 2
             )
-            for i, text in enumerate(self.text_lines):
-                self.image.blit(text, text.get_rect(left=0, top=self.font_line_width*i))
+            for i, text in enumerate(self.text_lines.values()):
+                self.image.blit(text, text.get_rect(left=10, top=(self.font_line_width*i)+10))
         else:
             self.image.fill(TRANSPARENT)
 

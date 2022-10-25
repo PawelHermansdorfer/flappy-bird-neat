@@ -16,7 +16,7 @@ class Bird(Entity):
     max_speed = 15
     jump_force = 15
 
-    spawn_offset_from_center = const.HEIGHT // 2
+    spawn_offset_from_center = const.HEIGHT // 4
 
     def __init__(self, genome, network):
         self.bird_imgs = [pygame.transform.scale(img,
@@ -28,7 +28,7 @@ class Bird(Entity):
         super().__init__(
             pos=(const.WIDTH // 2 - self.width,
                  random.randint(const.HEIGHT_CENTER-self.spawn_offset_from_center,
-                                const.HEIGHT+self.spawn_offset_from_center)),
+                                const.HEIGHT+self.spawn_offset_from_center//2)),
             image=pygame.Surface(self.img_size),
         )
         self.vel_y = 0
@@ -39,7 +39,7 @@ class Bird(Entity):
         # Brain
         self.genome = genome
         self.genome.fitness = 0
-        self.network = network
+        self.neural_network = network
 
     def pipe_collide(self, pipe):
         bird_mask = pygame.mask.from_surface(self.image)
@@ -49,8 +49,7 @@ class Bird(Entity):
         if (bird_mask.overlap(pipe_mask, offset)
             or (self.pos_x in range(int(pipe.pos_x), int(pipe.pos_x + pipe.width))
                 and self.pos_y < 0)):
-            # Decrease fitness
-            self.genome.fitness -= 1
+            print(self.genome.fitness)
             self.die()
 
     def update(self):
@@ -78,8 +77,6 @@ class Bird(Entity):
         ground_pos = const.HEIGHT - const.GROUND_HEIGHT
         if self.pos_y + (self.rect.height//2) > ground_pos:
             self.pos_y = ground_pos - (self.rect.height // 2)
-            # Decrease fitness
-            self.genome.fitness -= 1
             self.die()
 
         if self.vel_y < 0:
@@ -94,9 +91,6 @@ class Bird(Entity):
         self.image.fill(TRANSPARENT)
         self.image.blit(rotated_img, new_rect)
 
-        # Add genome fitness for each frame alive
-        if not self.dead:
-            self.genome.fitness += 0.1
         super().update()
 
     # Animate bird by using keyframes from list
