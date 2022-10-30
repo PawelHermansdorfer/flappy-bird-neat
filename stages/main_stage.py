@@ -187,11 +187,9 @@ class GameStage(Stage):
                 if self.best_genome is None:
                     self.best_genome = bird.genome
                     self.stats_display.draw_nn(self.best_genome, self.neat_config)
-                    print(id(self.best_genome))
                 elif bird.genome.fitness > self.best_genome.fitness:
                     self.best_genome = bird.genome
                     self.stats_display.draw_nn(self.best_genome, self.neat_config)
-                    print(id(self.best_genome))
 
         if passed_pipe:
             self.current_score = max([bird.score for bird in self.birds])
