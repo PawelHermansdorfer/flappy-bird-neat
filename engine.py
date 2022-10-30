@@ -27,6 +27,7 @@ class Engine:
             self.update_and_render_stage()
             pygame.display.flip()
 
+
     def update_and_render_stage(self):
         if self.current_stage.done:
             try:

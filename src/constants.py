@@ -8,6 +8,7 @@ FONT_SIZE = 18
 
 # BUTTON SETTINGS
 FONT_VICTOR_MONO = 'fonts/VictorMono-Regular.ttf'
+FONT_PUBLIC_PIXEL = 'fonts/PublicPixel.ttf'
 BUTTON_FRAME_WIDTH = 1.8
 
 # DISPLAY INFO

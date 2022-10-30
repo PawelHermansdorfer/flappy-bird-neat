@@ -6,7 +6,7 @@ from src.colors import TRANSPARENT, GREEN_4
 
 
 class Pipe(Entity):
-    gap_size = 150
+    gap_size = 180
     gap_margin = const.HEIGHT // 4
     width = 80
     color = GREEN_4

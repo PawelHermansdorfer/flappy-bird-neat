@@ -1,19 +1,7 @@
 ## TODO:
--> ??Make paralax, moving bg
--> Bird can fly over the pipe, cuz I only check pixel overlaping
--> Add and display score
-
--> Add stats
-    -> Add border to stats display rect
-
--> Implement NEAT AI
-
--> Visualize bird's brain (?MATPLOTLIB.PYPLOT)
-
-
-## DONE
--> Update offset of pipes after addin ground
+In stats determin number of hiden layers, cuz now its made badly :(
 
 
 ## Font
-Victor Mono: https://rubjo.github.io/victor-mono/
+Victor Mono(stats): https://rubjo.github.io/victor-mono/
+Public Pixel(score): https://www.fontspace.com/public-pixel-font-f72305
