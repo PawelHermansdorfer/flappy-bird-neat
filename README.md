@@ -10,7 +10,7 @@
 -> neat-python
 
 # How to run
-'''
+'''console
 > git clone https://github.com/PawelHermansdorfer/flappy-bird-neat.git
 > cd ./flappy-bird-neat
 > python ./main.py
