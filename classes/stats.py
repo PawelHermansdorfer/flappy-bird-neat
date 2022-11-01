@@ -6,17 +6,13 @@ from src.colors import *
 
 
 def draw_line_dashed(surface, color, start_pos, end_pos, width=1, dash_length=10, exclude_corners=True):
-    # convert tuples to numpy arrays
     start_pos = np.array(start_pos)
     end_pos = np.array(end_pos)
 
-    # get euclidian distance between start_pos and end_pos
     length = np.linalg.norm(end_pos - start_pos)
 
-    # get amount of pieces that line will be split up in (half of it are amount of dashes)
     dash_amount = int(length / dash_length)
 
-    # x-y-value-pairs of where dashes start (and on next, will end)
     dash_knots = np.array([np.linspace(start_pos[i], end_pos[i], dash_amount) for i in range(2)]).transpose()
 
     return [pygame.draw.line(surface, color, tuple(dash_knots[n]), tuple(dash_knots[n+1]), width)
@@ -52,6 +48,9 @@ class Stats(Entity):
         self.update_image()
 
     def draw_nn(self, genome, config):
+        """
+        Function used to display nodes and connetwions between them of best bird in current generation
+        """
         graph_width, grapth_height = self.display_size[0], self.display_size[1]*0.5
         graph = pygame.Surface((graph_width, grapth_height))
         graph = graph.convert_alpha()
@@ -92,6 +91,7 @@ class Stats(Entity):
             if node in nodes:
                 nodes.remove(node)
 
+        # NOTE(Aa_Pawelek): When there are more then 1 hidden layer they are all displaied in on column
         gap_between_nodes = (grapth_height-((node_radius*2)*len(nodes)))//(len(nodes)+1)
         x = graph_width//2
         for i, node in enumerate(nodes):
@@ -124,9 +124,11 @@ class Stats(Entity):
         self.graph = graph
         self.update_image()
 
+
     def clear_text(self):
         self.text_lines.clear()
         self.update_image()
+
 
     def update_image(self):
         if not self.hidden:
@@ -148,6 +150,10 @@ class Stats(Entity):
         else:
             self.image.fill(TRANSPARENT)
 
+
     def toggle(self):
+        """
+        Turns of and on visibility of panel
+        """
         self.hidden = not self.hidden
         self.update_image()

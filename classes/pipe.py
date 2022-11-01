@@ -6,8 +6,8 @@ from src.colors import TRANSPARENT, GREEN_4
 
 
 class Pipe(Entity):
-    gap_size = 180
-    gap_margin = const.HEIGHT // 4
+    gap_size = 170
+    gap_margin = const.HEIGHT // 3.5
     width = 80
     color = GREEN_4
     vel_x = -const.GAME_SPEED

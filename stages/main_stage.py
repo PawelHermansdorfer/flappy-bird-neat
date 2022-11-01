@@ -38,6 +38,7 @@ class GameStage(Stage):
         self.time_to_pipe = self.PIPE_SPAWN_DELAY
 
         self.stats_display = Stats('Current generation',
+                                   'Birds alive',
                                    'Highest score',
                                    'Highest fitness',
                                    'Lowest fitness',
@@ -87,27 +88,15 @@ class GameStage(Stage):
             self.birds.append(bird)
             self.layers['PLAYER'].add(bird)
 
-        # Update generation index in stats
-        self.population.reporters.start_generation(self.population.generation)
+        # Update stats panel
         self.stats_display.update_stats('Current generation', str(self.population.generation))
         self.stats_display.update_stats('Highest score', str(self.highest_score))
 
 
     def end_current_generation(self):
-        # Gather and report statistics.
-        best = None
-        for g in itervalues(self.population.population):
-            if best is None or g.fitness > best.fitness:
-                best = g
-        self.population.reporters.post_evaluate(self.neat_config,
-                                                self.population.population,
-                                                self.population.species,
-                                                best)
-
-        # Track the best genome ever seen.
-        if self.population.best_genome is None or best.fitness > self.population.best_genome.fitness:
-            self.population.best_genome = best
-
+        """
+        Function responsible for updatein NEAT population
+        """
         # Create the next generation from the current generation.
         self.population.population = self.population.reproduction.reproduce(
             self.neat_config, self.population.species,
@@ -116,14 +105,7 @@ class GameStage(Stage):
         # Divide the new population into species.
         self.population.species.speciate(self.neat_config, self.population.population, self.population.generation)
 
-        self.population.reporters.end_generation(self.neat_config, self.population.population, self.population.species)
-
         self.population.generation += 1
-
-        if self.neat_config.no_fitness_termination:
-            self.population.reporters.found_solution(self.neat_config, self.population.generation, self.population.best_genome)
-
-        return self.population.best_genome
 
 
     def update(self):
@@ -140,6 +122,7 @@ class GameStage(Stage):
 
         # Update mean fitenss in stats
         all_fitness = [bird.genome.fitness for bird in self.birds]
+        self.stats_display.update_stats('Birds alive', str(len([bird for bird in self.birds if not bird.dead])))
         self.stats_display.update_stats('Mean fitness', str(sum(all_fitness) // len(all_fitness)))
         self.stats_display.update_stats('Highest fitness', str(round(max(all_fitness), 2)))
         self.stats_display.update_stats('Lowest fitness', str(round(min(all_fitness), 2)))
@@ -159,8 +142,9 @@ class GameStage(Stage):
         # Find next pipe not passed by bird
         next_pipe_index = 0
         for bird in self.birds:
-            while self.pipes[next_pipe_index].pos_x + self.pipes[next_pipe_index].width < bird.pos_x:
-                next_pipe_index += 1
+            if not bird.dead:
+                while self.pipes[next_pipe_index].pos_x + self.pipes[next_pipe_index].width < bird.pos_x:
+                    next_pipe_index += 1
 
         if self.prev_pipe_index == next_pipe_index:
             passed_pipe = False
