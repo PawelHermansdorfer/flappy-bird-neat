@@ -1,7 +1,7 @@
 # Flappy bird neat
 ## How it Works
 - An Neat ai learning to play flappy bird game
-- Press "Space" to turn ON stats penel
+- Press "Space" to toggle stats penel
 - Press "d" to skip generation
 
 ## Requirements
