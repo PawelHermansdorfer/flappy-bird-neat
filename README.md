@@ -1,13 +1,13 @@
 ## Flappy bird neat
 # How it Works
--> An Neat ai learning to play flappy bird game
--> Press "Space" to turn ON stats penel
--> Press "d" to kill all birds in current generation
+- An Neat ai learning to play flappy bird game
+- Press "Space" to turn ON stats penel
+- Press "d" to kill all birds in current generation
 
 # Requirements
--> python 3.+
--> pygame
--> neat-python
+- python 3.+
+- pygame
+- neat-python
 
 # How to run
 ```console
