@@ -18,5 +18,5 @@
 
 
 ## Fonts
-Victor Mono(stats): https://rubjo.github.io/victor-mono/
-Public Pixel(score): https://www.fontspace.com/public-pixel-font-f72305
+- Victor Mono(stats): https://rubjo.github.io/victor-mono/
+- Public Pixel(score): https://www.fontspace.com/public-pixel-font-f72305
