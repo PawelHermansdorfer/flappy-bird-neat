@@ -2,7 +2,7 @@
 ## How it Works
 - An Neat ai learning to play flappy bird game
 - Press "Space" to turn ON stats penel
-- Press "d" to kill all birds in current generation
+- Press "d" to skip generation
 
 ## Requirements
 - python 3.+
