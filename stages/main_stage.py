@@ -161,7 +161,6 @@ class GameStage(Stage):
             if not bird.dead:
                 output = bird.neural_network.activate((bird.pos_y,
                                                        bird.vel_y,
-                                                       self.pipes[next_pipe_index].pos_x - bird.pos_x,
                                                        self.pipes[next_pipe_index].gap_start,
                                                        self.pipes[next_pipe_index].gap_end
                                                        ))

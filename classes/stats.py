@@ -58,12 +58,11 @@ class Stats(Entity):
 
         font = pygame.font.Font(const.FONT_VICTOR_MONO, 14)
         input_names = {
-                '-1': 'bird y',
-                '-2': 'vel y',
-                '-3': 'pipe dist',
-                '-4': 'Upper pipe x',
-                '-5': 'Lower pipe x',
-                }
+            '-1': 'bird y',
+            '-2': 'vel y',
+            '-3': 'Upper pipe x',
+            '-4': 'Lower pipe x',
+        }
 
         inputs = config.genome_config.input_keys
         outputs = config.genome_config.output_keys
@@ -76,6 +75,7 @@ class Stats(Entity):
         gap_between_inputs = (grapth_height-((node_radius*2)*len(inputs)))//(len(inputs)+1)
         x = 140
         for i, node in enumerate(inputs):
+            print(node)
             y = (gap_between_inputs+node_radius)*(i+1) + node_radius*i
             nodes_positions[str(node)] = (x, y)
             text = font.render(input_names[str(node)], True, WHITE_SMOKE)
