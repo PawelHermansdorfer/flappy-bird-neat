@@ -75,7 +75,6 @@ class Stats(Entity):
         gap_between_inputs = (grapth_height-((node_radius*2)*len(inputs)))//(len(inputs)+1)
         x = 140
         for i, node in enumerate(inputs):
-            print(node)
             y = (gap_between_inputs+node_radius)*(i+1) + node_radius*i
             nodes_positions[str(node)] = (x, y)
             text = font.render(input_names[str(node)], True, WHITE_SMOKE)
