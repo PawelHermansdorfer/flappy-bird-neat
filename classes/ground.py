@@ -4,7 +4,7 @@ import src.constants as const
 
 
 class Ground(Entity):
-    ground_image = pygame.image.load('imgs/base.png')
+    ground_image = pygame.image.load('imgs/ground.png')
     img_width = ground_image.get_size()[0]
     number_of_tiles = 0
     while number_of_tiles*img_width < const.WIDTH * 2:
